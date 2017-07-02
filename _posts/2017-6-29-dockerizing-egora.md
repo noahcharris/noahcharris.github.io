@@ -18,4 +18,6 @@ Egora is a sprawling single page application that I wrote in 2014-2015 after gra
 I like to think of the idea as a combination of reddit and google maps. It's meant to geographize conversations by allowing users to filter groups by both topic (like a subreddit) and location (i.e. India, Miami, "{ your hometown }"). I think this would be an intersting way to scope internet discourse.
 
 Here is a screenshot of the project when it was online.
-![My helpful screenshot]({{ site.url }}/assets/egora_screenshot.jpg)
+![Egora Landing Configuration]({{ site.url }}/assets/egora_screenshot.jpg)
+
+
