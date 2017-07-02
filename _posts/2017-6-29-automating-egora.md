@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Dockerizing Egora"
+title:  "Automating with Terraform and Packer"
 date:   2017-6-29 16:16:01 -0600
 categories: jekyll update
 ---
@@ -12,7 +12,7 @@ Egora is a sprawling single page application that I wrote in 2014-2015 after gra
 
 I like to think of the idea as a combination of reddit and google maps (but I used OpenStreetMap instead I think) I used Leaflet for the mapping library. It's meant to geographize conversations by allowing users to filter groups by both topic (like a subreddit) and location (i.e. India, Miami, "{ your hometown }"). I think this would be an interesting way to scope internet discourse.
 
-Egora screenshot in landing configuration.
+Egora screenshot in landing configuration:
 
 ![Egora Landing Configuration]({{ site.url }}/assets/egora_screenshot.jpg)
 
@@ -48,17 +48,50 @@ resource "aws_eip" "ip" {
 }
 ```
 
-Terraform has some cool advanced features too,,,,,,,,,,,,,,,,
+Terraform has some cool advanced features too,,,,,,,TODO,,,,,,,,,
 
 
+....use Terraform to build infrastructure on AWS including an EC2 instance built from a Packer image. After it's loaded this Packer image will also provision (run some code) to initialize the server.
 
-## Docker and Packer
+Here is the example packer build file from their documentation:
 
-Let's zoom out a bit. Remember that Egora's server has a main serving process and then various worker processes. One of our ultimate goals alongside automating infrastucture is to make horizontal scaling like this much more elegant and modular. This is where Docker comes in, because Docker can package each of the services into its own environment with all needed dependencies. For instance, one of the Egora services uses RabbitMQ for a queue, another uses memcached (or Redis I forget). Then instead of having a mess of software all on one machine, the services are neatly organized and become very convenient and modular. These Docker 'containers' have a small footprint compared to virtual machines and so Docker lends itself to massive and artful horizontal scaling.
+```
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  },
 
-But we need something to control Docker, which is where Packer comes in. Packer is the software we use to build the machine images we will be loading with Terraform. Packer also does something called 'provisioning' which just means running code to initialize the server after the image is up and running. So here is the outline of our automation:
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "us-east-1",
+    "source_ami_filter": {
+      "filters": {
+      "virtualization-type": "hvm",
+      "name": "*ubuntu-xenial-16.04-amd64-server-*",
+      "root-device-type": "ebs"
+      },
+      "owners": ["099720109477"],
+      "most_recent": true
+    },
+    "instance_type": "t2.micro",
+    "ssh_username": "ubuntu",
+    "ami_name": "packer-example {{timestamp}}"
+  }],
 
-Use Terraform to build infrstructure on AWS including an EC2 instance built from a Packer image. After it's loaded this Packer image will pull all of our services onto the server via Docker and then run them.
+  "provisioners": [{
+    "type": "shell",
+    "inline": [
+      "sleep 30",
+      "sudo apt-get update",
+      "sudo apt-get install -y redis-server"
+    ]
+  }]
+
+}
+```
 
 
 
