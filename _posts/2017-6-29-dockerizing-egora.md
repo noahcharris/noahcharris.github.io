@@ -18,6 +18,8 @@ Egora screenshot in landing configuration.
 
 Ok, so as well as rehosting it, I'm going to use the Docker/Packer/Terraform trifecta to completely automate the deployment process at every step of the way... uh here we go. So I first a folder called agora-deployment where I'm going to store all my infrastructure scripts and files.
 
+
+
 ## Terraform
 
 Terraform automates infrastructure deployment, it can plug into many services. We're using AWS here. It's actually pretty simple, the guide on their site is really good. Here is the sample configuration file that we will use.
@@ -38,12 +40,25 @@ resource "aws_instance" "example" {
 
 Now just insert the AWS keys and you are good to go. NEVER let this file anywhere near version control. I once had $6000 charged to my account because I accidentally put these on github. I managed to resolve the issue with an Amazon rep, but that ish is hella scary.
 
-Then we just cd to the directory with the configuration file and run various terraform commands to plan/create/modify/destory infrastructure! Pretty cool.
+Then we just cd to the directory with the configuration file and run various terraform commands to plan/create/modify/destory infrastructure! Pretty cool. We just keep adding resource blocks to our code to create more infrastructure, and we can even reference between resources using interpolation like so
 
-These settings work pretty well for me, so now let's move onto
+```
+resource "aws_eip" "ip" {
+  instance = "${aws_instance.example.id}"
+}
+```
 
-## Packer
+Terraform has some cool advanced features too,,,,,,,,,,,,,,,,
 
+
+
+## Docker and Packer
+
+Let's zoom out a bit. Remember that Egora's server has a main serving process and then various worker processes. One of our ultimate goals alongside automating infrastucture is to make horizontal scaling like this much more elegant and modular. This is where Docker comes in, because Docker can package each of the services into its own environment with all needed dependencies. For instance, one of the Egora services uses RabbitMQ for a queue, another uses memcached (or Redis I forget). Then instead of having a mess of software all on one machine, the services are neatly organized and become very convenient and modular. These Docker 'containers' have a small footprint compared to virtual machines and so Docker lends itself to massive and artful horizontal scaling.
+
+But we need something to control Docker, which is where Packer comes in. Packer is the software we use to build the machine images we will be loading with Terraform. Packer also does something called 'provisioning' which just means running code to initialize the server after the image is up and running. So here is the outline of our automation:
+
+Use Terraform to build infrstructure on AWS including an EC2 instance built from a Packer image. After it's loaded this Packer image will pull all of our services onto the server via Docker and then run them.
 
 
 
