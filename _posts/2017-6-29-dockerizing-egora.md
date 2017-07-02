@@ -18,15 +18,16 @@ Egora screenshot in landing configuration.
 
 Ok, so as well as rehosting it, I'm going to use the Docker/Packer/Terraform trifecta to completely automate the deployment process at every step of the way... uh here we go. So I first a folder called agora-deployment where I'm going to store all my infrastructure scripts and files.
 
-TERRAFORM
+## Terraform
 
-Terraform automates infrastructure deployment, it can plug into many services. We're using AWS here. It's actually pretty simple, the guide on their site is really good. Here is a sample configuration file that we will make.
+Terraform automates infrastructure deployment, it can plug into many services. We're using AWS here. It's actually pretty simple, the guide on their site is really good. Here is the sample configuration file that we will use.
 
+example.tf
 ```
 provider "aws" {
   access_key = "ACCESS_KEY_HERE"
   secret_key = "SECRET_KEY_HERE"
-  region     = "us-east-1"
+  region     = "us-west-1"
 }
 
 resource "aws_instance" "example" {
@@ -34,6 +35,16 @@ resource "aws_instance" "example" {
   instance_type = "t2.micro"
 }
 ```
+
+Now just insert the AWS keys and you are good to go. NEVER let this file anywhere near version control. I once had $6000 charged to my account because I accidentally put these on github. I managed to resolve the issue with an Amazon rep, but that ish is hella scary.
+
+Then we just cd to the directory with the configuration file and run various terraform commands to plan/create/modify/destory infrastructure! Pretty cool.
+
+These settings work pretty well for me, so now let's move onto
+
+## Packer
+
+
 
 
 
